@@ -1,0 +1,31 @@
+{
+  "name": "opus-attendance",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && node scripts/bundle-runtime-assets.mjs",
+    "start": "node .next/standalone/server.js",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:seed": "node scripts/seed.mjs",
+    "db:release": "node scripts/release.mjs",
+    "check:capacity": "node scripts/capacity-race-check.mjs"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.5",
+    "next": "15.5.18",
+    "postgres": "^3.4.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "server-only": "^0.0.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5.7.3"
+  }
+}
