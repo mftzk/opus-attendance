@@ -6,18 +6,32 @@ import * as schema from "./schema"
 declare global {
   // Next.js reloads modules in development; reuse one pool across reloads.
   // eslint-disable-next-line no-var
-  var __attendanceSql: ReturnType<typeof postgres> | undefined
+  var __attendanceDb: ReturnType<typeof createDatabase> | undefined
 }
 
-function createClient() {
+function createDatabase() {
   const url = process.env.DATABASE_URL
   if (!url) throw new Error("DATABASE_URL is not set")
-  return postgres(url, { max: 10, prepare: false })
+  return drizzle(postgres(url, { max: 10, prepare: false }), { schema })
 }
 
-export const sql = globalThis.__attendanceSql ?? createClient()
-if (process.env.NODE_ENV !== "production") globalThis.__attendanceSql = sql
+/**
+ * The connection is opened on first use, not at import time: the production
+ * build renders route modules without a database, and a module-level
+ * connection would fail the build instead of the request.
+ */
+export function getDb() {
+  if (!globalThis.__attendanceDb) globalThis.__attendanceDb = createDatabase()
+  return globalThis.__attendanceDb
+}
 
-export const db = drizzle(sql, { schema })
-export type Database = typeof db
+export type Database = ReturnType<typeof createDatabase>
+
+/** Ergonomic alias so callers can write `db.select(...)` as usual. */
+export const db = new Proxy({} as Database, {
+  get(_target, property, receiver) {
+    return Reflect.get(getDb() as object, property, receiver)
+  },
+})
+
 export { schema }
